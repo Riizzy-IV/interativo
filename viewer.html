@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moema by Yoo — Interativo 3D</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      background: #0d1117;
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      user-select: none
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh
+    }
+
+    /* ── Loading ── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: #0d1117;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 22px;
+      z-index: 100;
+      transition: opacity .7s
+    }
+
+    #loading-title {
+      font-size: 22px;
+      letter-spacing: 10px;
+      font-weight: 200;
+      color: #fff
+    }
+
+    #loading-addr {
+      font-size: 10px;
+      color: rgba(255, 255, 255, .25);
+      letter-spacing: 3px;
+      margin-top: -10px
+    }
+
+    #bar-wrap {
+      width: 260px;
+      height: 2px;
+      background: rgba(255, 255, 255, .1);
+      border-radius: 2px
+    }
+
+    #bar {
+      height: 100%;
+      width: 0;
+      background: #e87430;
+      border-radius: 2px;
+      transition: width .3s
+    }
+
+    #loading-txt {
+      font-size: 10px;
+      color: rgba(255, 255, 255, .3);
+      letter-spacing: 3px
+    }
+
+    /* ── Project label ── */
+    #project-label {
+      position: fixed;
+      top: 20px;
+      left: 24px;
+      z-index: 20;
+      opacity: 0;
+      transition: opacity .5s;
+      pointer-events: none
+    }
+
+    #project-label h1 {
+      font-size: 13px;
+      letter-spacing: 5px;
+      font-weight: 300;
+      color: #fff;
+      line-height: 1
+    }
+
+    #project-label p {
+      font-size: 9px;
+      color: rgba(255, 255, 255, .3);
+      letter-spacing: 1px;
+      margin-top: 4px
+    }
+
+    /* ── Layer info (top-right) ── */
+    #layer-info {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, .35);
+      letter-spacing: 2px;
+      z-index: 20;
+      text-align: right;
+      opacity: 0;
+      transition: opacity .4s
+    }
+
+    /* ── Hint ── */
+    #hint {
+      position: fixed;
+      bottom: 72px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: rgba(255, 255, 255, .2);
+      letter-spacing: 2px;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .5s;
+      white-space: nowrap
+    }
+
+    /* ── Floor arrows ── */
+    #floor-arrows {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(10, 12, 18, .85);
+      border: 1px solid rgba(255, 255, 255, .15);
+      border-radius: 12px;
+      backdrop-filter: blur(12px);
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .4s;
+      overflow: hidden
+    }
+
+    #floor-arrows.show {
+      opacity: 1;
+      pointer-events: all
+    }
+
+    .farrow {
+      width: 52px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255, 255, 255, .8);
+      font-size: 14px;
+      transition: background .15s
+    }
+
+    .farrow:hover {
+      background: rgba(255, 255, 255, .12)
+    }
+
+    #floor-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: #fff;
+      padding: 2px 10px;
+      white-space: nowrap;
+      text-align: center;
+      font-family: inherit
+    }
+
+    /* ── Floor bar ── */
+    #floor-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 3px;
+      background: rgba(8, 10, 16, .8);
+      border: 1px solid rgba(255, 255, 255, .07);
+      padding: 5px;
+      border-radius: 40px;
+      backdrop-filter: blur(20px);
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .5s
+    }
+
+    #floor-bar.show {
+      opacity: 1;
+      pointer-events: all
+    }
+
+    .fbtn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, .45);
+      padding: 7px 18px;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 11px;
+      letter-spacing: .5px;
+      transition: all .2s;
+      white-space: nowrap;
+      font-family: inherit
+    }
+
+    .fbtn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, .07)
+    }
+
+    .fbtn.active {
+      background: #e87430;
+      color: #fff;
+      font-weight: 500
+    }
+
+    /* ── Panorama overlay ── */
+    #pano {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .4s
+    }
+
+    #pano.show {
+      opacity: 1;
+      pointer-events: all
+    }
+
+    #pano-loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: rgba(255, 255, 255, .3);
+      letter-spacing: 3px
+    }
+
+    #pano-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 42px;
+      height: 42px;
+      background: rgba(0, 0, 0, .55);
+      border: 1px solid rgba(255, 255, 255, .15);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #fff;
+      backdrop-filter: blur(8px);
+      transition: background .2s;
+      flex-shrink: 0
+    }
+
+    #pano-close:hover {
+      background: rgba(255, 255, 255, .15)
+    }
+
+    .pnav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 42px;
+      height: 42px;
+      background: rgba(0, 0, 0, .55);
+      border: 1px solid rgba(255, 255, 255, .15);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #fff;
+      backdrop-filter: blur(8px);
+      transition: background .2s
+    }
+
+    .pnav:hover {
+      background: rgba(255, 255, 255, .15)
+    }
+
+    #pnav-prev {
+      left: 20px
+    }
+
+    #pnav-next {
+      right: 20px
+    }
+
+    #pano-label {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, .6);
+      border: 1px solid rgba(255, 255, 255, .12);
+      padding: 7px 20px;
+      border-radius: 20px;
+      font-size: 10px;
+      letter-spacing: 2.5px;
+      color: rgba(255, 255, 255, .75);
+      backdrop-filter: blur(8px);
+      white-space: nowrap
+    }
+
+    #pano-counter {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      font-size: 10px;
+      color: rgba(255, 255, 255, .3);
+      letter-spacing: 1px
+    }
+
+    #pano {
+      cursor: grab
+    }
+
+    #pano.drag {
+      cursor: grabbing
+    }
+
+    /* ── Tour 360 overlay ── */
+    #tour-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: #000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .4s;
+      display: flex;
+      flex-direction: column
+    }
+
+    #tour-overlay.show {
+      opacity: 1;
+      pointer-events: all
+    }
+
+    #tour-overlay iframe {
+      flex: 1;
+      border: none;
+      width: 100%;
+      height: 100%
+    }
+
+    #tour-topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: linear-gradient(to bottom, rgba(0,0,0,.7) 0%, transparent 100%);
+      z-index: 1;
+      pointer-events: none
+    }
+
+    #tour-title {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,.85);
+      font-weight: 300
+    }
+
+    #tour-close {
+      width: 42px;
+      height: 42px;
+      background: rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: #fff;
+      backdrop-filter: blur(8px);
+      transition: background .2s;
+      pointer-events: all
+    }
+
+    #tour-close:hover {
+      background: rgba(255,255,255,.15)
+    }
+
+    /* ── Position debug overlay ── */
+    #pos-debug {
+      position: fixed;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.8);
+      border: 1px solid rgba(255,180,0,.5);
+      color: #ffb400;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+      padding: 8px 18px;
+      border-radius: 8px;
+      backdrop-filter: blur(8px);
+      z-index: 40;
+      pointer-events: none;
+      display: none;
+      white-space: nowrap;
+      text-align: center
+    }
+
+    #pos-debug.active { display: block }
+
+    #pos-clicked {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,.9);
+      border: 1px solid #ffb400;
+      color: #ffb400;
+      font-size: 13px;
+      letter-spacing: 1px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      z-index: 50;
+      display: none;
+      text-align: center;
+      pointer-events: none
+    }
+
+    #pos-clicked.show { display: block }
+
+    /* ── Tour hotspot sprite label ── */
+    .tour-label-sprite {
+      position: fixed;
+      pointer-events: none;
+      z-index: 25;
+      transform: translate(-50%, -140%);
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: #fff;
+      background: rgba(0,0,0,.55);
+      border: 1px solid rgba(255,255,255,.2);
+      padding: 4px 10px;
+      border-radius: 20px;
+      backdrop-filter: blur(6px);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .2s
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="c"></canvas>
+
+  <!-- Loading -->
+  <div id="loading">
+    <div id="loading-title">MOEMA BY YOO</div>
+    <div id="loading-addr">AV. DOS IMARÉS, 182 · SÃO PAULO</div>
+    <div id="bar-wrap">
+      <div id="bar"></div>
+    </div>
+    <div id="loading-txt">CARREGANDO...</div>
+  </div>
+
+  <!-- Project label -->
+  <div id="project-label">
+    <h1>MOEMA BY YOO</h1>
+    <p>Av. dos Imarés, 182 · Indianópolis · SP</p>
+  </div>
+
+  <!-- Layer info -->
+  <div id="layer-info"></div>
+
+  <!-- Hint -->
+  <div id="hint">ARRASTAR · ROTACIONAR &nbsp;|&nbsp; SCROLL · ZOOM &nbsp;|&nbsp; CLIQUE NO PONTO · ENTRAR</div>
+
+  <!-- Floor arrows -->
+  <div id="floor-arrows">
+    <button class="farrow" id="farrow-up">▲</button>
+    <div id="floor-label">3D</div>
+    <button class="farrow" id="farrow-down">▼</button>
+  </div>
+
+  <!-- Floor bar (populated by JS) -->
+  <div id="floor-bar"></div>
+
+  <!-- Position debug -->
+  <div id="pos-debug">P · MODO POSICIONAMENTO &nbsp;|&nbsp; <span id="pos-coords">ox: 0 · oz: 0</span></div>
+  <div id="pos-clicked"></div>
+
+  <!-- Tour 360 overlay -->
+  <div id="tour-overlay">
+    <div id="tour-topbar">
+      <span id="tour-title">TOUR 360°</span>
+      <button id="tour-close">✕</button>
+    </div>
+    <iframe id="tour-frame" src="" allow="fullscreen *; autoplay *; screen-wake-lock *; geolocation *; accelerometer *; gyroscope *; xr-spatial-tracking *; vr *; web-share *;" allowfullscreen webkitallowfullscreen mozallowfullscreen referrerpolicy="origin"></iframe>
+  </div>
+
+  <!-- Panorama -->
+  <div id="pano">
+    <div id="pano-loading">CARREGANDO PANORAMA...</div>
+    <div id="pano-close">✕</div>
+    <button class="pnav" id="pnav-prev">‹</button>
+    <button class="pnav" id="pnav-next">›</button>
+    <div id="pano-label">—</div>
+    <div id="pano-counter"></div>
+  </div>
+
+  <script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"}}
+</script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+    import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
+    import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+    // ── API data ────────────────────────────────────────────────────
+    const CDN = 'https://cdn.iteleport.co/';
+    const apiData = await fetch('model/api_data.json').then(r => r.json());
+    const LAYERS = apiData.layers
+      .filter(l => l.skyboxes?.length > 0)
+      .map(l => ({
+        name: l.name,
+        skyboxes: l.skyboxes.map(sb => ({
+          name: sb.originalName,
+          pos: { x: +sb.position.x, y: +sb.position.y, z: +sb.position.z },
+          url: CDN + sb.texture.jpg.medium
+        }))
+      }));
+
+    // ── Renderer ────────────────────────────────────────────────────
+    const canvas = document.getElementById('c');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.localClippingEnabled = true;
+
+    // IBL — room environment for realistic PBR shading
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    pmrem.compileEquirectangularShader();
+
+    // ── Main scene ──────────────────────────────────────────────────
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x8fa8ba);
+    scene.fog = new THREE.FogExp2(0x8fa8ba, 0.0003);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+    pmrem.dispose();
+
+    const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 8000);
+    camera.position.set(0, 300, 700);
+
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.maxPolarAngle = Math.PI / 1.8;
+    controls.minDistance = 20;
+    controls.maxDistance = 3000;
+
+    // Lighting
+    scene.add(new THREE.AmbientLight(0xd0dde8, 1.4));
+    const sun = new THREE.DirectionalLight(0xfff8f0, 1.8);
+    sun.position.set(300, 700, 200);
+    scene.add(sun);
+    const fill = new THREE.DirectionalLight(0xb0c8e0, 0.5);
+    fill.position.set(-200, 300, -300);
+    scene.add(fill);
+
+    // Ground — satellite tile (ArcGIS World Imagery, Av. dos Imarés zoom 17)
+    // Tile coords for lat=-23.5983, lon=-46.6621, zoom=17 → x=24046, y=38972
+    const SAT_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/17/38972/24046';
+    new THREE.TextureLoader().load(SAT_URL, satTex => {
+      satTex.colorSpace = THREE.SRGBColorSpace;
+      const gnd = new THREE.Mesh(
+        new THREE.PlaneGeometry(1200, 1200),
+        new THREE.MeshBasicMaterial({ map: satTex })
+      );
+      gnd.rotation.x = -Math.PI / 2;
+      gnd.position.y = -3;
+      scene.add(gnd);
+    }, undefined, () => {
+      // Fallback: neutral ground
+      const gnd = new THREE.Mesh(
+        new THREE.PlaneGeometry(8000, 8000),
+        new THREE.MeshStandardMaterial({ color: 0x6a7a84, roughness: 1 })
+      );
+      gnd.rotation.x = -Math.PI / 2;
+      gnd.position.y = -3;
+      scene.add(gnd);
+    });
+
+    // ── Panorama scene ───────────────────────────────────────────────
+    const panoScene = new THREE.Scene();
+    const panoCam = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 1, 2000);
+    panoCam.rotation.order = 'YXZ';
+    const panoSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(1000, 64, 32),
+      new THREE.MeshBasicMaterial({ side: THREE.BackSide, color: 0x111111 })
+    );
+    panoScene.add(panoSphere);
+
+    // ── Hotspot sprite ───────────────────────────────────────────────
+    function buildHotspotTex() {
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = 128;
+      const ctx = cv.getContext('2d');
+      const grd = ctx.createRadialGradient(64, 64, 16, 64, 64, 60);
+      grd.addColorStop(0, 'rgba(255,255,255,.25)');
+      grd.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath(); ctx.arc(64, 64, 60, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowColor = 'white'; ctx.shadowBlur = 18;
+      ctx.fillStyle = 'rgba(255,255,255,.95)';
+      ctx.beginPath(); ctx.arc(64, 64, 14, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(64, 64, 28, 0, Math.PI * 2); ctx.stroke();
+      return new THREE.CanvasTexture(cv);
+    }
+    const hotTex = buildHotspotTex();
+
+    // ── Floor definitions ─────────────────────────────────────────────
+    // tours[]: hotspots de tour 360 para esta planta
+    //   ox/oz = offset em world units a partir do centro do prédio
+    const FLOORS = [
+      {
+        label: '1-2 And', cut: 0.17, cam: 'plan', plant: 'plantas/tipo2.png', ox: 4, oz: -3, sc: 1.02,
+        tours: [
+          // tours do 1-2 And aqui (apartamentos tipo 1 e 2)
+        ],
+      },
+      {
+        label: '3 And', cut: 0.25, cam: 'plan', plant: 'plantas/tipo3.png', ox: 6, oz: -5, sc: 1.05,
+        tours: [
+          { label: 'Academia', ox: 32.9, oz: 10.2, url: 'https://tour.meupasseiovirtual.com/view/Gb6E6CWiCUg' },
+          // { label: 'Jogos',      ox: 0, oz: 0, url: 'https://...' },
+          // { label: 'Lavanderia', ox: 0, oz: 0, url: 'https://...' },
+        ],
+      },
+      {
+        label: '4-12 And', cut: 0.45, cam: 'iso', plant: 'plantas/tipo4.png', ox: -9.8, oz: 3.2, sc: 0.90,
+        tours: [
+          // { label: 'Apartamento', ox: 0, oz: 0, url: 'https://...' },
+        ],
+      },
+      { label: '3D', cut: null, tours: [] },
+    ];
+
+    // ── State ─────────────────────────────────────────────────────────
+    const modelGroup = new THREE.Group();
+    scene.add(modelGroup);
+    let modelSc = 1;
+    let mode = 'dollhouse'; // 'dollhouse' | 'panorama'
+    let activeLayer = -1;          // LAYERS index for panorama hotspots
+    let activeFloor = FLOORS.length - 1; // start at '3D'
+    let hotMarkers = [];
+    let curSkyboxes = [];
+    let curSkyIdx = 0;
+    let worldBox = new THREE.Box3();
+
+    // Camera animation
+    let camAnim = null;
+    function animCam(toPos, toLook, duration = 1.4) {
+      camAnim = {
+        sp: camera.position.clone(), sl: controls.target.clone(),
+        ep: toPos, el: toLook, t: 0, dur: duration
+      };
+    }
+    function easeInOut(t) { return t < .5 ? 2 * t * t : -1 + (4 - 2 * t) * t }
+
+    // ── Model loading ────────────────────────────────────────────────
+    const draco = new DRACOLoader();
+    draco.setDecoderPath('/draco/');
+
+    const ktx2 = new KTX2Loader();
+    ktx2.setTranscoderPath(location.origin + '/basis/');
+    ktx2.detectSupport(renderer);
+
+    const loader = new GLTFLoader();
+    loader.setDRACOLoader(draco);
+    loader.setKTX2Loader(ktx2);
+    await MeshoptDecoder.ready;
+    loader.setMeshoptDecoder(MeshoptDecoder);
+
+    const barEl = document.getElementById('bar');
+    const txtEl = document.getElementById('loading-txt');
+
+    loader.load('Vertice_torre_mobile.glb',
+      gltf => {
+        // ── Glass material names (exact)
+        const GLASS_MATS = new Set([
+          'Glass_Clear_glTF',
+          'VIDRO_PURO_glTF',
+          'VID___VIDRO_PORTAS_E_JANELAS_200x200x200_glTF',
+          'PTL__Translucent_Glass_Blue_1_glTF_1',
+          'PTL__Translucent_Glass_Blue_2_glTF',
+          'PTL_Translucent_Glass_Green_Dark_glTF',
+          'VISOR_PLASTICO_glTF',
+        ]);
+        // ── Pool / water material names
+        const POOL_MATS = new Set([
+          'Foam_Bubbles_glTF',
+          'HIJAU_glTF',
+        ]);
+        // ── Dark facade / metal names that should stay dark
+        const DARK_MATS = new Set([
+          'ALVENARIA_PRETA_MEGASCANS_01_glTF',
+          'Aluminium_Black_Anodized_glTF',
+          'CINZA_ESCURO_glTF', 'CINZA_ESCURO_glTF_1', 'CINZA_ESCURO_glTF_2', 'CINZA_ESCURO_2_glTF',
+          'PTL_ALUMI_NIO_PRETO___ESQUADRIAS_glTF',
+          'PTL_CONCRETO_SMOKE___LAMINATTO_glTF', 'PTL_CONCRETO_SMOKE___LAMINATTO_glTF_1',
+          'PRETO_LIMPO_glTF', 'PRETO_VAZIO_glTF',
+          'ESQUADRIA_METAL_glTF',
+          'PTL_PIETRA_GREY___LAMINATTO_glTF',
+        ]);
+
+        gltf.scene.traverse(n => {
+          if (!n.isMesh) return;
+          const fix = m => {
+            if (!m) return;
+            m.side = THREE.DoubleSide;
+            const name = m.name || '';
+
+            // Glass — semi-transparent blue tint
+            if (GLASS_MATS.has(name)) {
+              m.transparent = true;
+              m.opacity = 0.22;
+              m.roughness = 0.04;
+              m.metalness = 0.1;
+              m.color.set(0x9abfd4);
+              m.envMapIntensity = 2.2;
+              m.depthWrite = false;
+              return;
+            }
+            // Pool / water — vivid blue
+            if (POOL_MATS.has(name)) {
+              m.color.set(0x0c6fa0);
+              m.roughness = 0.04;
+              m.metalness = 0.3;
+              m.envMapIntensity = 2.5;
+              return;
+            }
+            // Dark facade elements — keep dark but visible
+            if (DARK_MATS.has(name)) {
+              const hsl = {};
+              m.color.getHSL(hsl);
+              if (hsl.l < 0.08) m.color.setHSL(hsl.h, hsl.s, 0.10);
+              m.envMapIntensity = 0.6;
+              return;
+            }
+            // All other materials — subtle env map
+            m.envMapIntensity = 0.9;
+          };
+          Array.isArray(n.material) ? n.material.forEach(fix) : fix(n.material);
+        });
+        modelGroup.add(gltf.scene);
+        onModelReady();
+      },
+      xhr => {
+        if (xhr.lengthComputable) {
+          const pct = Math.round(xhr.loaded / xhr.total * 100);
+          barEl.style.width = pct + '%';
+          txtEl.textContent = 'CARREGANDO... ' + pct + '%';
+        }
+      },
+      err => {
+        console.error('GLB error:', err);
+        onModelReady();
+      }
+    );
+
+    function onModelReady() {
+      // Fit model
+      const box = new THREE.Box3().setFromObject(modelGroup);
+      const center = box.getCenter(new THREE.Vector3());
+      const size = box.getSize(new THREE.Vector3());
+      modelGroup.position.sub(center);
+      modelGroup.position.y += size.y / 2;
+      modelSc = 400 / Math.max(size.x, size.y, size.z);
+      modelGroup.scale.setScalar(modelSc);
+
+      // World bounding box after transform (used by selectFloor)
+      worldBox.setFromObject(modelGroup);
+
+      // Use worldBox center so controls.target is exact (not assumed 0,0,0)
+      const cx = (worldBox.min.x + worldBox.max.x) / 2;
+      const cz = (worldBox.min.z + worldBox.max.z) / 2;
+      const wH2 = worldBox.max.y - worldBox.min.y;
+      const dist2 = wH2 * 0.85;
+      camera.position.set(cx + dist2 * 0.55, worldBox.min.y + wH2 * 0.55, cz + dist2 * 0.75);
+      controls.target.set(cx, worldBox.min.y + wH2 * 0.30, cz);
+      controls.update();
+
+      // Hide loading
+      const el = document.getElementById('loading');
+      el.style.opacity = '0';
+      setTimeout(() => el.style.display = 'none', 700);
+
+      // Persistent 3 And base plant
+      showBasePlant();
+
+      // Tour 360 hotspots — load saved positions first, then build
+      loadTourPositions();
+      buildTourHotspots();
+
+      // Build floor UI
+      buildFloorBar();
+      document.getElementById('floor-bar').classList.add('show');
+      document.getElementById('floor-arrows').classList.add('show');
+      document.getElementById('floor-label').textContent = FLOORS[activeFloor].label;
+      document.getElementById('project-label').style.opacity = '1';
+      document.getElementById('hint').style.opacity = '1';
+      document.getElementById('layer-info').style.opacity = '0';
+    }
+
+    // ── Floor bar ────────────────────────────────────────────────────
+    function buildFloorBar() {
+      const bar = document.getElementById('floor-bar');
+      FLOORS.forEach((f, i) => {
+        const b = document.createElement('button');
+        b.className = 'fbtn' + (i === activeFloor ? ' active' : '');
+        b.textContent = f.label;
+        b.dataset.idx = i;
+        b.addEventListener('click', () => {
+          document.querySelectorAll('.fbtn').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          selectFloor(i);
+        });
+        bar.appendChild(b);
+      });
+    }
+
+
+    // ── Humanized floor plan overlay ─────────────────────────────────
+    let plantMesh = null;
+    let plantForIdx = -1;          // which FLOORS index the current plant belongs to
+    let basePlantMesh = null;      // 3 And plant — always visible, ignores clipping
+    const plantTexCache = {};
+    const texLoader = new THREE.TextureLoader();
+
+    function showBasePlant() {
+      if (basePlantMesh) return;
+      const floor = FLOORS[1]; // 3 And
+      const wH = worldBox.max.y - worldBox.min.y;
+      const wW = worldBox.max.x - worldBox.min.x;
+      const wD = worldBox.max.z - worldBox.min.z;
+      const cx = (worldBox.min.x + worldBox.max.x) / 2;
+      const cz = (worldBox.min.z + worldBox.max.z) / 2;
+      const y = worldBox.min.y + wH * (floor.cut - 0.004);
+
+      const applyTex = tex => {
+        const imgAR = tex.image.width / tex.image.height;
+        const bldAR = wW / wD;
+        let pw = wW, pd = wD;
+        if (imgAR > bldAR) { pd = wW / imgAR; } else { pw = wD * imgAR; }
+        basePlantMesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(pw * (floor.sc ?? 1.0), pd * (floor.sc ?? 1.0)),
+          new THREE.MeshBasicMaterial({
+            map: tex,
+            transparent: true,
+            alphaTest: 0.05,
+            depthTest: true,
+            depthWrite: false,
+            polygonOffset: true,
+            polygonOffsetFactor: -4,
+            polygonOffsetUnits: -4,
+            clippingPlanes: [],   // ignore renderer's global clipping plane
+          })
+        );
+        basePlantMesh.rotation.x = -Math.PI / 2;
+        basePlantMesh.renderOrder = 1;
+        basePlantMesh.position.set(cx + floor.ox, y, cz + floor.oz);
+        scene.add(basePlantMesh);
+      };
+
+      if (plantTexCache[floor.plant]) {
+        applyTex(plantTexCache[floor.plant]);
+      } else {
+        texLoader.load(
+          floor.plant,
+          tex => { tex.colorSpace = THREE.SRGBColorSpace; plantTexCache[floor.plant] = tex; applyTex(tex); },
+          undefined,
+          err => console.error('[basePlant] failed to load:', floor.plant, err)
+        );
+      }
+    }
+
+    function showPlant(floor) {
+      removePlant();
+      if (!floor.plant) return;
+      if (floor === FLOORS[1]) return; // 3 And is always shown via basePlantMesh
+      const idx = FLOORS.indexOf(floor);
+      plantForIdx = idx;
+
+      const wH = worldBox.max.y - worldBox.min.y;
+      const wW = worldBox.max.x - worldBox.min.x;
+      const wD = worldBox.max.z - worldBox.min.z;
+      const cx = (worldBox.min.x + worldBox.max.x) / 2;
+      const cz = (worldBox.min.z + worldBox.max.z) / 2;
+      const y = worldBox.min.y + wH * (floor.cut - 0.004);
+
+      const applyTex = tex => {
+        if (plantForIdx !== idx) return; // floor changed while loading — abort
+        // Scale plane to match image aspect ratio fitted inside building footprint
+        const imgAR = tex.image.width / tex.image.height;
+        const bldAR = wW / wD;
+        let pw = wW, pd = wD;
+        if (imgAR > bldAR) { pd = wW / imgAR; } else { pw = wD * imgAR; }
+        plantMesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(pw * (floor.sc ?? 0.87), pd * (floor.sc ?? 0.87)),
+          new THREE.MeshBasicMaterial({
+            map: tex,
+            transparent: true,
+            alphaTest: 0.05,
+            depthTest: true,
+            depthWrite: false,
+            polygonOffset: true,
+            polygonOffsetFactor: -4,
+            polygonOffsetUnits: -4,
+          })
+        );
+        plantMesh.rotation.x = -Math.PI / 2;
+        plantMesh.renderOrder = 1;
+        plantMesh.position.set(cx + floor.ox, y, cz + floor.oz);
+        scene.add(plantMesh);
+      };
+
+      if (plantTexCache[floor.plant]) {
+        applyTex(plantTexCache[floor.plant]);
+      } else {
+        texLoader.load(
+          floor.plant,
+          tex => { tex.colorSpace = THREE.SRGBColorSpace; plantTexCache[floor.plant] = tex; applyTex(tex); },
+          undefined,
+          err => console.error('[plant] failed to load:', floor.plant, err)
+        );
+      }
+    }
+
+    function removePlant() {
+      plantForIdx = -1;
+      if (plantMesh) {
+        scene.remove(plantMesh);
+        plantMesh.geometry.dispose();
+        plantMesh.material.dispose();
+        plantMesh = null;
+      }
+    }
+
+    function clearHotspots() {
+      hotMarkers.forEach(m => modelGroup.remove(m));
+      hotMarkers = []; curSkyboxes = [];
+    }
+
+    // ── Floor arrow navigation ───────────────────────────────────────
+    function selectFloor(idx) {
+      activeFloor = idx;
+      const floor = FLOORS[idx];
+      document.getElementById('floor-label').textContent = floor.label;
+
+      const wH = worldBox.max.y - worldBox.min.y;
+      const cx = (worldBox.min.x + worldBox.max.x) / 2;
+      const cz = (worldBox.min.z + worldBox.max.z) / 2;
+      const wW = worldBox.max.x - worldBox.min.x;
+      const wD = worldBox.max.z - worldBox.min.z;
+
+      if (floor.cut === null) {
+        // 3D — full building view
+        renderer.clippingPlanes = [];
+        removePlant();
+        const dist = wH * 0.85;
+        animCam(
+          new THREE.Vector3(cx + dist * 0.55, worldBox.min.y + wH * 0.55, cz + dist * 0.75),
+          new THREE.Vector3(cx, worldBox.min.y + wH * 0.30, cz)
+        );
+      } else {
+        // Floor view — isometric angle (matches ATTA3D reference style)
+        const wCeil = worldBox.min.y + wH * floor.cut;
+        renderer.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, -1, 0), wCeil)];
+        showPlant(floor);
+        if (floor.cam === 'iso') {
+          const span = Math.max(wW, wD) * 0.85;
+          animCam(
+            new THREE.Vector3(cx + span * 1.0, wCeil + span * 0.75, cz + span * 1.0),
+            new THREE.Vector3(cx, wCeil - span * 0.18, cz),
+            1.5
+          );
+        } else {
+          const span = Math.max(wW, wD) * 0.55;
+          animCam(
+            new THREE.Vector3(cx - span * 0.4, wCeil + span * 0.85, cz + span * 0.45),
+            new THREE.Vector3(cx, wCeil - span * 0.05, cz),
+            1.5
+          );
+        }
+      }
+
+      // Show / hide tour markers for this floor
+      if (tourMarkers.length) updateTourMarkerVisibility(idx);
+
+      // Link to panorama layer if available
+      clearHotspots();
+      const layerIdx = idx < LAYERS.length ? idx : -1;
+      activeLayer = layerIdx;
+      if (layerIdx >= 0) {
+        curSkyboxes = LAYERS[layerIdx].skyboxes;
+        LAYERS[layerIdx].skyboxes.forEach((sb, i) => {
+          const spr = new THREE.Sprite(
+            new THREE.SpriteMaterial({ map: hotTex, transparent: true, depthTest: false, depthWrite: false })
+          );
+          const sz = 14 / modelSc;
+          spr.scale.set(sz, sz, sz);
+          spr.position.set(sb.pos.x, sb.pos.y, sb.pos.z);
+          spr.userData.hotspotIdx = i;
+          modelGroup.add(spr);
+          hotMarkers.push(spr);
+        });
+      }
+    }
+
+    document.getElementById('farrow-up').addEventListener('click', () => {
+      selectFloor(Math.min(activeFloor + 1, FLOORS.length - 1));
+    });
+    document.getElementById('farrow-down').addEventListener('click', () => {
+      selectFloor(Math.max(activeFloor - 1, 0));
+    });
+
+    // ── Raycasting ───────────────────────────────────────────────────
+    const ray = new THREE.Raycaster();
+    const mp = new THREE.Vector2();
+    let lastClickTime = 0;
+
+    canvas.addEventListener('click', e => {
+      if (mode === 'panorama' || hotMarkers.length === 0) return;
+      // debounce accidental drags
+      if (Date.now() - lastClickTime < 200) return;
+      mp.x = (e.clientX / innerWidth) * 2 - 1;
+      mp.y = -(e.clientY / innerHeight) * 2 + 1;
+      ray.setFromCamera(mp, camera);
+      const hits = ray.intersectObjects(hotMarkers);
+      if (hits.length) enterPanorama(hits[0].object.userData.hotspotIdx);
+    });
+    canvas.addEventListener('mousedown', () => lastClickTime = Date.now());
+
+    // ── Panorama ──────────────────────────────────────────────────────
+    let panoYaw = 0, panoPitch = 0, panoDrag = null;
+    let panoLoading = false;
+
+    function enterPanorama(idx) {
+      curSkyIdx = idx;
+      mode = 'panorama';
+      controls.enabled = false;
+      panoYaw = 0; panoPitch = 0;
+      applyPanoCam();
+
+      const sb = curSkyboxes[idx];
+      const panoEl = document.getElementById('pano');
+      const lblEl = document.getElementById('pano-label');
+      const cntEl = document.getElementById('pano-counter');
+      const ldgEl = document.getElementById('pano-loading');
+
+      lblEl.textContent = (activeLayer >= 0 ? LAYERS[activeLayer].name.toUpperCase() + ' · ' : '') + sb.name;
+      cntEl.textContent = (idx + 1) + ' / ' + curSkyboxes.length;
+      ldgEl.style.display = 'flex';
+      panoSphere.material.color.set(0x111111);
+      if (panoSphere.material.map) { panoSphere.material.map.dispose(); panoSphere.material.map = null; }
+      panoSphere.material.needsUpdate = true;
+
+      panoEl.classList.add('show');
+      document.getElementById('floor-arrows').classList.remove('show');
+
+      texLoader.load(sb.url, tex => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        panoSphere.material.map = tex;
+        panoSphere.material.color.set(0xffffff);
+        panoSphere.material.needsUpdate = true;
+        ldgEl.style.display = 'none';
+      });
+    }
+
+    function exitPanorama() {
+      mode = 'panorama'; // keep until transition done
+      document.getElementById('pano').classList.remove('show');
+      setTimeout(() => {
+        mode = 'dollhouse';
+        controls.enabled = true;
+        if (panoSphere.material.map) { panoSphere.material.map.dispose(); panoSphere.material.map = null; }
+        selectFloor(activeFloor);
+        document.getElementById('floor-arrows').classList.add('show');
+      }, 400);
+    }
+
+    function applyPanoCam() {
+      panoCam.rotation.y = THREE.MathUtils.degToRad(panoYaw);
+      panoCam.rotation.x = THREE.MathUtils.degToRad(panoPitch);
+    }
+
+    // Panorama mouse controls
+    const panoEl = document.getElementById('pano');
+    panoEl.addEventListener('mousedown', e => {
+      panoDrag = { x: e.clientX, y: e.clientY, y0: panoYaw, p0: panoPitch };
+      panoEl.classList.add('drag');
+    });
+    window.addEventListener('mousemove', e => {
+      if (!panoDrag) return;
+      panoYaw = panoDrag.y0 - (e.clientX - panoDrag.x) * 0.22;
+      panoPitch = Math.max(-80, Math.min(80, panoDrag.p0 - (e.clientY - panoDrag.y) * 0.22));
+      applyPanoCam();
+    });
+    window.addEventListener('mouseup', () => { panoDrag = null; panoEl.classList.remove('drag'); });
+
+    // Touch
+    panoEl.addEventListener('touchstart', e => {
+      const t = e.touches[0];
+      panoDrag = { x: t.clientX, y: t.clientY, y0: panoYaw, p0: panoPitch };
+    }, { passive: true });
+    window.addEventListener('touchmove', e => {
+      if (!panoDrag) return;
+      const t = e.touches[0];
+      panoYaw = panoDrag.y0 - (t.clientX - panoDrag.x) * 0.27;
+      panoPitch = Math.max(-80, Math.min(80, panoDrag.p0 - (t.clientY - panoDrag.y) * 0.27));
+      applyPanoCam();
+    }, { passive: true });
+    window.addEventListener('touchend', () => panoDrag = null);
+
+    // FOV zoom in pano
+    canvas.addEventListener('wheel', e => {
+      if (mode !== 'panorama') return;
+      panoCam.fov = Math.max(40, Math.min(100, panoCam.fov + e.deltaY * 0.04));
+      panoCam.updateProjectionMatrix();
+    }, { passive: true });
+
+    // Pano buttons
+    document.getElementById('pano-close').addEventListener('click', exitPanorama);
+    document.getElementById('pnav-prev').addEventListener('click', () => {
+      if (!curSkyboxes.length) return;
+      enterPanorama((curSkyIdx - 1 + curSkyboxes.length) % curSkyboxes.length);
+    });
+    document.getElementById('pnav-next').addEventListener('click', () => {
+      if (!curSkyboxes.length) return;
+      enterPanorama((curSkyIdx + 1) % curSkyboxes.length);
+    });
+
+    // Keyboard
+    window.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && mode === 'panorama') exitPanorama();
+      if (e.key === 'Escape') closeTour();
+      if (mode === 'panorama') {
+        if (e.key === 'ArrowRight') document.getElementById('pnav-next').click();
+        if (e.key === 'ArrowLeft') document.getElementById('pnav-prev').click();
+      }
+    });
+
+    // ── Tour 360 via iframe ───────────────────────────────────────────
+    let tourMarkers = [];
+
+    // tourMarkers: flat array of sprites; each has userData.floorIdx + userData.tour
+    function buildTourHotspots() {
+      tourMarkers.forEach(m => scene.remove(m));
+      tourMarkers = [];
+
+      const wH = worldBox.max.y - worldBox.min.y;
+      const cx = (worldBox.min.x + worldBox.max.x) / 2;
+      const cz = (worldBox.min.z + worldBox.max.z) / 2;
+      const scale = wH * 0.09;
+
+      // Build tour icon texture once
+      const cv2 = document.createElement('canvas'); cv2.width = cv2.height = 128;
+      const c2 = cv2.getContext('2d');
+      c2.strokeStyle = 'rgba(80,180,255,0.9)'; c2.lineWidth = 8;
+      c2.beginPath(); c2.arc(64, 64, 46, 0, Math.PI * 2); c2.stroke();
+      c2.fillStyle = 'rgba(40,140,255,0.85)';
+      c2.beginPath(); c2.arc(64, 64, 30, 0, Math.PI * 2); c2.fill();
+      c2.fillStyle = '#fff';
+      c2.beginPath(); c2.moveTo(52, 44); c2.lineTo(52, 84); c2.lineTo(88, 64); c2.closePath(); c2.fill();
+      const tourTex = new THREE.CanvasTexture(cv2);
+
+      FLOORS.forEach((floor, fi) => {
+        if (!floor.tours?.length || floor.cut === null) return;
+        const y = worldBox.min.y + wH * floor.cut + wH * 0.015;
+        floor.tours.forEach(t => {
+          const spr = new THREE.Sprite(
+            new THREE.SpriteMaterial({
+              map: tourTex,
+              transparent: true,
+              depthTest: false,
+              depthWrite: false,
+              clippingPlanes: [],
+            })
+          );
+          spr.scale.set(scale, scale, 1);
+          spr.position.set(cx + t.ox, y, cz + t.oz);
+          spr.userData.floorIdx = fi;
+          spr.userData.tour = t;
+          spr.visible = false;
+          scene.add(spr);
+          tourMarkers.push(spr);
+        });
+      });
+    }
+
+    function updateTourMarkerVisibility(floorIdx) {
+      tourMarkers.forEach(m => { m.visible = m.userData.floorIdx === floorIdx; });
+    }
+
+    function openTour(tour) {
+      document.getElementById('tour-title').textContent = tour.label.toUpperCase();
+      document.getElementById('tour-frame').src = tour.url;
+      document.getElementById('tour-overlay').classList.add('show');
+      document.getElementById('floor-arrows').classList.remove('show');
+      controls.enabled = false;
+    }
+
+    function closeTour() {
+      const overlay = document.getElementById('tour-overlay');
+      if (!overlay.classList.contains('show')) return;
+      overlay.classList.remove('show');
+      // Clear iframe src so tour stops running in background
+      setTimeout(() => { document.getElementById('tour-frame').src = ''; }, 400);
+      controls.enabled = true;
+      document.getElementById('floor-arrows').classList.add('show');
+    }
+
+    document.getElementById('tour-close').addEventListener('click', closeTour);
+
+    // Detect tour hotspot clicks (separate from existing panorama hotspot check)
+    canvas.addEventListener('click', e => {
+      if (mode === 'panorama' || !tourMarkers.length) return;
+      if (Date.now() - lastClickTime > 250) return; // ignore drags (held > 250ms)
+      mp.x = (e.clientX / innerWidth) * 2 - 1;
+      mp.y = -(e.clientY / innerHeight) * 2 + 1;
+      ray.setFromCamera(mp, camera);
+      const hits = ray.intersectObjects(tourMarkers.filter(m => m.visible));
+      if (hits.length) openTour(hits[0].object.userData.tour);
+    });
+
+    // Hover label for tour hotspots
+    const tourLabelEl = document.createElement('div');
+    tourLabelEl.className = 'tour-label-sprite';
+    document.body.appendChild(tourLabelEl);
+
+    canvas.addEventListener('mousemove', e => {
+      if (mode === 'panorama' || !tourMarkers.length) return;
+      mp.x = (e.clientX / innerWidth) * 2 - 1;
+      mp.y = -(e.clientY / innerHeight) * 2 + 1;
+      ray.setFromCamera(mp, camera);
+      const hits = ray.intersectObjects(tourMarkers.filter(m => m.visible));
+      if (hits.length) {
+        const t = hits[0].object.userData.tour;
+        tourLabelEl.textContent = t.label.toUpperCase();
+        tourLabelEl.style.left = e.clientX + 'px';
+        tourLabelEl.style.top = e.clientY + 'px';
+        tourLabelEl.style.opacity = '1';
+        canvas.style.cursor = 'pointer';
+      } else {
+        tourLabelEl.style.opacity = '0';
+        canvas.style.cursor = '';
+      }
+    });
+
+    // ── Position debug (press P to toggle) ───────────────────────────
+    let posDebugMode = false;
+    const posDebugEl  = document.getElementById('pos-debug');
+    const posCoordsEl = document.getElementById('pos-coords');
+    const posClickedEl = document.getElementById('pos-clicked');
+    // Invisible plane at floor cut height for raycasting
+    const debugPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(2000, 2000),
+      new THREE.MeshBasicMaterial({ visible: false, side: THREE.DoubleSide })
+    );
+    debugPlane.rotation.x = -Math.PI / 2;
+    scene.add(debugPlane);
+
+    function setPosDebugHeight() {
+      const floor = FLOORS[activeFloor];
+      if (!floor || floor.cut === null) return;
+      const wH = worldBox.max.y - worldBox.min.y;
+      debugPlane.position.y = worldBox.min.y + wH * floor.cut;
+    }
+
+    window.addEventListener('keydown', e => {
+      if (e.key === 'p' || e.key === 'P') {
+        posDebugMode = !posDebugMode;
+        posDebugEl.classList.toggle('active', posDebugMode);
+        if (posDebugMode) {
+          setPosDebugHeight();
+          controls.enableRotate = false; // lock rotation so angle stays top-down
+          const floor = FLOORS[activeFloor];
+          if (floor && floor.cut !== null) {
+            const wH = worldBox.max.y - worldBox.min.y;
+            const wW = worldBox.max.x - worldBox.min.x;
+            const wD = worldBox.max.z - worldBox.min.z;
+            const cx = (worldBox.min.x + worldBox.max.x) / 2;
+            const cz = (worldBox.min.z + worldBox.max.z) / 2;
+            const wCeil = worldBox.min.y + wH * floor.cut;
+            const span = Math.max(wW, wD) * 0.75;
+            animCam(
+              new THREE.Vector3(cx, wCeil + span * 1.8, cz),
+              new THREE.Vector3(cx, wCeil, cz),
+              0.8
+            );
+          }
+        } else {
+          controls.enableRotate = true;
+        }
+      }
+    });
+
+    let draggedMarker = null;
+
+    function getPosOnPlane(clientX, clientY) {
+      mp.x = (clientX / innerWidth) * 2 - 1;
+      mp.y = -(clientY / innerHeight) * 2 + 1;
+      ray.setFromCamera(mp, camera);
+      const hits = ray.intersectObject(debugPlane);
+      if (!hits.length) return null;
+      const cx = (worldBox.min.x + worldBox.max.x) / 2;
+      const cz = (worldBox.min.z + worldBox.max.z) / 2;
+      return {
+        point: hits[0].point,
+        ox: parseFloat((hits[0].point.x - cx).toFixed(1)),
+        oz: parseFloat((hits[0].point.z - cz).toFixed(1)),
+      };
+    }
+
+    canvas.addEventListener('mousedown', e => {
+      if (!posDebugMode || !tourMarkers.length) return;
+      mp.x = (e.clientX / innerWidth) * 2 - 1;
+      mp.y = -(e.clientY / innerHeight) * 2 + 1;
+      ray.setFromCamera(mp, camera);
+      const hits = ray.intersectObjects(tourMarkers.filter(m => m.visible));
+      if (hits.length) {
+        draggedMarker = hits[0].object;
+        controls.enabled = false;
+        canvas.style.cursor = 'grabbing';
+        e.stopImmediatePropagation();
+      }
+    });
+
+    window.addEventListener('mousemove', e => {
+      if (!posDebugMode) return;
+      const res = getPosOnPlane(e.clientX, e.clientY);
+      if (!res) return;
+      posCoordsEl.textContent = `ox: ${res.ox}  ·  oz: ${res.oz}`;
+      if (draggedMarker) {
+        draggedMarker.position.x = res.point.x;
+        draggedMarker.position.z = res.point.z;
+        posClickedEl.innerHTML = `ARRASTANDO: <b>${draggedMarker.userData.tour.label}</b><br><br>ox: <b>${res.ox}</b> &nbsp; oz: <b>${res.oz}</b>`;
+        posClickedEl.classList.add('show');
+      }
+    });
+
+    // Persist tour positions in localStorage
+    const LS_KEY = 'vertice_tour_positions';
+
+    function saveTourPositions() {
+      const data = {};
+      FLOORS.forEach((floor, fi) => {
+        (floor.tours || []).forEach(t => {
+          data[`${fi}__${t.label}`] = { ox: t.ox, oz: t.oz };
+        });
+      });
+      localStorage.setItem(LS_KEY, JSON.stringify(data));
+    }
+
+    function loadTourPositions() {
+      try {
+        const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+        FLOORS.forEach((floor, fi) => {
+          (floor.tours || []).forEach(t => {
+            const saved = data[`${fi}__${t.label}`];
+            if (saved) { t.ox = saved.ox; t.oz = saved.oz; }
+          });
+        });
+      } catch (_) {}
+    }
+
+    // Load saved positions before building hotspots (called after worldBox is ready)
+    // — inserted into onModelReady flow via loadTourPositions() call below
+
+    window.addEventListener('mouseup', e => {
+      if (!draggedMarker) return;
+      const res = getPosOnPlane(e.clientX, e.clientY);
+      if (res) {
+        draggedMarker.userData.tour.ox = res.ox;
+        draggedMarker.userData.tour.oz = res.oz;
+        saveTourPositions();
+        posClickedEl.innerHTML = `✓ SALVO: <b>${draggedMarker.userData.tour.label}</b><br><br>ox: <b>${res.ox}</b> &nbsp; oz: <b>${res.oz}</b><br><br><small>posição guardada no browser automaticamente</small>`;
+        posClickedEl.classList.add('show');
+        setTimeout(() => posClickedEl.classList.remove('show'), 4000);
+      }
+      draggedMarker = null;
+      controls.enabled = true;
+      controls.enableRotate = false; // keep rotation locked while still in debug mode
+      canvas.style.cursor = '';
+    });
+
+    canvas.addEventListener('mousemove', e => {
+      if (!posDebugMode || draggedMarker) return;
+      mp.x = (e.clientX / innerWidth) * 2 - 1;
+      mp.y = -(e.clientY / innerHeight) * 2 + 1;
+      ray.setFromCamera(mp, camera);
+      const hits = ray.intersectObjects(tourMarkers.filter(m => m.visible));
+      canvas.style.cursor = hits.length ? 'grab' : '';
+    });
+
+    // ── Render loop ──────────────────────────────────────────────────
+    (function loop() {
+      requestAnimationFrame(loop);
+
+      // Camera animation
+      if (camAnim) {
+        camAnim.t = Math.min(1, camAnim.t + 0.016 / camAnim.dur);
+        const e = easeInOut(camAnim.t);
+        camera.position.lerpVectors(camAnim.sp, camAnim.ep, e);
+        controls.target.lerpVectors(camAnim.sl, camAnim.el, e);
+        controls.update();
+        if (camAnim.t >= 1) camAnim = null;
+      }
+
+      if (mode === 'panorama') {
+        renderer.render(panoScene, panoCam);
+      } else {
+        controls.update();
+        renderer.render(scene, camera);
+      }
+    })();
+
+    // ── Resize ───────────────────────────────────────────────────────
+    window.addEventListener('resize', () => {
+      camera.aspect = panoCam.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      panoCam.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+  </script>
+</body>
+
+</html>

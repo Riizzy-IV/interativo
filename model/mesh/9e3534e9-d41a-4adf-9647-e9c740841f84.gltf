@@ -1,0 +1,179 @@
+{
+    "asset": {
+        "generator": "FBX2glTF v0.9.7",
+        "version": "2.0"
+    },
+    "scene": 0,
+    "extensionsUsed": [
+        "KHR_draco_mesh_compression"
+    ],
+    "extensionsRequired": [
+        "KHR_draco_mesh_compression"
+    ],
+    "buffers": [
+        {
+            "byteLength": 784942,
+            "uri": "0fa8aad7-a332-4eb7-9a9d-552d8b3bbe57.bin"
+        }
+    ],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteLength": 784942,
+            "byteOffset": 0
+        }
+    ],
+    "scenes": [
+        {
+            "name": "Root Scene",
+            "nodes": [
+                0
+            ]
+        }
+    ],
+    "accessors": [
+        {
+            "componentType": 5125,
+            "type": "SCALAR",
+            "count": 189237
+        },
+        {
+            "componentType": 5126,
+            "type": "VEC3",
+            "count": 154256,
+            "min": [
+                -182.714248657227,
+                -219.997650146484,
+                -0.340230703353882
+            ],
+            "max": [
+                101.346382141113,
+                89.2032775878906,
+                36.2182579040527
+            ]
+        },
+        {
+            "componentType": 5126,
+            "type": "VEC3",
+            "count": 154256
+        },
+        {
+            "componentType": 5126,
+            "type": "VEC2",
+            "count": 154256
+        }
+    ],
+    "images": [
+        {
+            "name": "Archi.jpg",
+            "uri": "Archi.jpg"
+        }
+    ],
+    "samplers": [
+        {}
+    ],
+    "textures": [
+        {
+            "name": "Bitmaptexture",
+            "sampler": 0,
+            "source": 0
+        }
+    ],
+    "materials": [
+        {
+            "name": "ArchiITL",
+            "alphaMode": "OPAQUE",
+            "extras": {
+                "fromFBX": {
+                    "shadingModel": "Metallic/Roughness",
+                    "isTruePBR": true
+                }
+            },
+            "pbrMetallicRoughness": {
+                "baseColorTexture": {
+                    "index": 0,
+                    "texCoord": 0
+                },
+                "baseColorFactor": [
+                    0.587999999523163,
+                    0.587999999523163,
+                    0.587999999523163,
+                    1.0
+                ],
+                "metallicFactor": 0.0,
+                "roughnessFactor": 0.899999976158142
+            }
+        }
+    ],
+    "meshes": [
+        {
+            "name": "Archi",
+            "primitives": [
+                {
+                    "material": 0,
+                    "mode": 4,
+                    "attributes": {
+                        "NORMAL": 2,
+                        "POSITION": 1,
+                        "TEXCOORD_0": 3
+                    },
+                    "indices": 0,
+                    "extensions": {
+                        "KHR_draco_mesh_compression": {
+                            "bufferView": 0,
+                            "attributes": {
+                                "NORMAL": 1,
+                                "POSITION": 0,
+                                "TEXCOORD_0": 2
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "name": "RootNode",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "children": [
+                1
+            ]
+        },
+        {
+            "name": "Archi",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                -0.70710676908493,
+                -0.0,
+                0.0,
+                0.70710676908493
+            ],
+            "scale": [
+                1.00000059604645,
+                1.00000059604645,
+                1.00000059604645
+            ],
+            "mesh": 0
+        }
+    ]
+}

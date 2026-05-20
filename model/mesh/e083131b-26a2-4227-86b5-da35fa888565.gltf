@@ -1,0 +1,186 @@
+{
+    "asset": {
+        "generator": "FBX2glTF v0.9.7",
+        "version": "2.0"
+    },
+    "scene": 0,
+    "extensionsUsed": [
+        "KHR_draco_mesh_compression"
+    ],
+    "extensionsRequired": [
+        "KHR_draco_mesh_compression"
+    ],
+    "buffers": [
+        {
+            "byteLength": 742538,
+            "uri": "c91f4541-9619-4759-9b0b-77a1d2881858.bin"
+        }
+    ],
+    "bufferViews": [
+        {
+            "buffer": 0,
+            "byteLength": 742538,
+            "byteOffset": 0
+        }
+    ],
+    "scenes": [
+        {
+            "name": "Root Scene",
+            "nodes": [
+                0
+            ]
+        }
+    ],
+    "accessors": [
+        {
+            "componentType": 5125,
+            "type": "SCALAR",
+            "count": 188790
+        },
+        {
+            "componentType": 5126,
+            "type": "VEC3",
+            "count": 109295,
+            "min": [
+                -205.106369018555,
+                -192.314804077148,
+                -7.57856893539429
+            ],
+            "max": [
+                131.831436157227,
+                222.528396606445,
+                43.6100120544434
+            ]
+        },
+        {
+            "componentType": 5126,
+            "type": "VEC3",
+            "count": 109295
+        },
+        {
+            "componentType": 5126,
+            "type": "VEC2",
+            "count": 109295
+        },
+        {
+            "componentType": 5126,
+            "type": "VEC2",
+            "count": 109295
+        }
+    ],
+    "images": [
+        {
+            "name": "Lobby.jpg",
+            "uri": "Lobby.jpg"
+        }
+    ],
+    "samplers": [
+        {}
+    ],
+    "textures": [
+        {
+            "name": "Bitmaptexture",
+            "sampler": 0,
+            "source": 0
+        }
+    ],
+    "materials": [
+        {
+            "name": "Lobby",
+            "alphaMode": "OPAQUE",
+            "extras": {
+                "fromFBX": {
+                    "shadingModel": "Metallic/Roughness",
+                    "isTruePBR": true
+                }
+            },
+            "pbrMetallicRoughness": {
+                "baseColorTexture": {
+                    "index": 0,
+                    "texCoord": 0
+                },
+                "baseColorFactor": [
+                    0.587999999523163,
+                    0.587999999523163,
+                    0.587999999523163,
+                    1.0
+                ],
+                "metallicFactor": 0.0,
+                "roughnessFactor": 0.899999976158142
+            }
+        }
+    ],
+    "meshes": [
+        {
+            "name": "Lobby",
+            "primitives": [
+                {
+                    "material": 0,
+                    "mode": 4,
+                    "attributes": {
+                        "NORMAL": 2,
+                        "POSITION": 1,
+                        "TEXCOORD_0": 3,
+                        "TEXCOORD_1": 4
+                    },
+                    "indices": 0,
+                    "extensions": {
+                        "KHR_draco_mesh_compression": {
+                            "bufferView": 0,
+                            "attributes": {
+                                "NORMAL": 1,
+                                "POSITION": 0,
+                                "TEXCOORD_0": 2,
+                                "TEXCOORD_1": 3
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "nodes": [
+        {
+            "name": "RootNode",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "scale": [
+                1.0,
+                1.0,
+                1.0
+            ],
+            "children": [
+                1
+            ]
+        },
+        {
+            "name": "Lobby",
+            "translation": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "rotation": [
+                -0.70710676908493,
+                -0.0,
+                0.0,
+                0.70710676908493
+            ],
+            "scale": [
+                1.00000059604645,
+                1.00000059604645,
+                1.00000059604645
+            ],
+            "mesh": 0
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+# Modelo original não usado (386MB)
+Vertice_ori.glb
+
+# Variantes de modelo não usadas
+model/Vertice_tex.glb
+model/Vertice_web.glb
+model/Vertice_webp.glb
+
+# Plantas extras não usadas pelo viewer
+plantas/IZOMÉTRICAS/
+plantas/otimizadas/
+
+# Sistema
+.DS_Store
+Thumbs.db
+briefing-tecnico-3d.md
