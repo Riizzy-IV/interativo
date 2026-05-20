@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Moema by Yoo — Interativo 3D</title>
+  <title>Vertice Anália Franco — Interativo 3D</title>
   <!-- Preload critical assets -->
   <link rel="preload" href="logo2.webp" as="image" type="image/webp" />
   <link rel="preload" href="Vertice_torre_mobile.glb" as="fetch" crossorigin="anonymous" />
@@ -52,8 +52,15 @@
     }
 
     @keyframes logoFadeIn {
-      from { opacity: 0; transform: translateY(6px) }
-      to   { opacity: 1; transform: translateY(0) }
+      from {
+        opacity: 0;
+        transform: translateY(6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
     }
 
     #bar-wrap {
@@ -384,7 +391,7 @@
       align-items: center;
       justify-content: space-between;
       padding: 16px 20px;
-      background: linear-gradient(to bottom, rgba(0,0,0,.7) 0%, transparent 100%);
+      background: linear-gradient(to bottom, rgba(0, 0, 0, .7) 0%, transparent 100%);
       z-index: 1;
       pointer-events: none
     }
@@ -392,15 +399,15 @@
     #tour-title {
       font-size: 11px;
       letter-spacing: 3px;
-      color: rgba(255,255,255,.85);
+      color: rgba(255, 255, 255, .85);
       font-weight: 300
     }
 
     #tour-close {
       width: 42px;
       height: 42px;
-      background: rgba(0,0,0,.55);
-      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(0, 0, 0, .55);
+      border: 1px solid rgba(255, 255, 255, .2);
       border-radius: 50%;
       cursor: pointer;
       display: flex;
@@ -414,7 +421,7 @@
     }
 
     #tour-close:hover {
-      background: rgba(255,255,255,.15)
+      background: rgba(255, 255, 255, .15)
     }
 
     /* ── Position debug overlay ── */
@@ -423,8 +430,8 @@
       bottom: 70px;
       left: 50%;
       transform: translateX(-50%);
-      background: rgba(0,0,0,.8);
-      border: 1px solid rgba(255,180,0,.5);
+      background: rgba(0, 0, 0, .8);
+      border: 1px solid rgba(255, 180, 0, .5);
       color: #ffb400;
       font-size: 11px;
       letter-spacing: 1.5px;
@@ -438,14 +445,16 @@
       text-align: center
     }
 
-    #pos-debug.active { display: block }
+    #pos-debug.active {
+      display: block
+    }
 
     #pos-clicked {
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(0,0,0,.9);
+      background: rgba(0, 0, 0, .9);
       border: 1px solid #ffb400;
       color: #ffb400;
       font-size: 13px;
@@ -458,7 +467,9 @@
       pointer-events: none
     }
 
-    #pos-clicked.show { display: block }
+    #pos-clicked.show {
+      display: block
+    }
 
     /* ── Tour hotspot sprite label ── */
     .tour-label-sprite {
@@ -469,8 +480,8 @@
       font-size: 9px;
       letter-spacing: 2px;
       color: #fff;
-      background: rgba(0,0,0,.55);
-      border: 1px solid rgba(255,255,255,.2);
+      background: rgba(0, 0, 0, .55);
+      border: 1px solid rgba(255, 255, 255, .2);
       padding: 4px 10px;
       border-radius: 20px;
       backdrop-filter: blur(6px);
@@ -496,8 +507,8 @@
 
   <!-- Project label -->
   <div id="project-label">
-    <h1>MOEMA BY YOO</h1>
-    <p>Av. dos Imarés, 182 · Indianópolis · SP</p>
+    <h1>VERTICE ANÁLIA FRANCO</h1>
+    <p>Rua Bruna, 340 · Chácara Mafalda · SP</p>
   </div>
 
   <!-- Layer info -->
@@ -526,7 +537,9 @@
       <span id="tour-title">TOUR 360°</span>
       <button id="tour-close">✕</button>
     </div>
-    <iframe id="tour-frame" src="" allow="fullscreen *; autoplay *; screen-wake-lock *; geolocation *; accelerometer *; gyroscope *; xr-spatial-tracking *; vr *; web-share *;" allowfullscreen webkitallowfullscreen mozallowfullscreen referrerpolicy="origin"></iframe>
+    <iframe id="tour-frame" src=""
+      allow="fullscreen *; autoplay *; screen-wake-lock *; geolocation *; accelerometer *; gyroscope *; xr-spatial-tracking *; vr *; web-share *;"
+      allowfullscreen webkitallowfullscreen mozallowfullscreen referrerpolicy="origin"></iframe>
   </div>
 
   <!-- Panorama -->
@@ -1301,7 +1314,7 @@
 
     // ── Position debug (press P to toggle) ───────────────────────────
     let posDebugMode = false;
-    const posDebugEl  = document.getElementById('pos-debug');
+    const posDebugEl = document.getElementById('pos-debug');
     const posCoordsEl = document.getElementById('pos-coords');
     const posClickedEl = document.getElementById('pos-clicked');
     // Invisible plane at floor cut height for raycasting
@@ -1413,7 +1426,7 @@
             if (saved) { t.ox = saved.ox; t.oz = saved.oz; }
           });
         });
-      } catch (_) {}
+      } catch (_) { }
     }
 
     // Load saved positions before building hotspots (called after worldBox is ready)
