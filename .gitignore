@@ -10,6 +10,17 @@ model/Vertice_webp.glb
 plantas/IZOMÉTRICAS/
 plantas/otimizadas/
 
+# PNGs originais substituídos por WebP
+plantas/tipo2.png
+plantas/tipo3.png
+plantas/tipo4.png
+logo2.png
+
+# Dependências de build
+node_modules/
+package.json
+package-lock.json
+
 # Sistema
 .DS_Store
 Thumbs.db
