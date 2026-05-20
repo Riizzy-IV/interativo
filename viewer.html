@@ -30,49 +30,48 @@
     #loading {
       position: fixed;
       inset: 0;
-      background: #0d1117;
+      background: #dfe8eb;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 22px;
+      gap: 28px;
       z-index: 100;
       transition: opacity .7s
     }
 
-    #loading-title {
-      font-size: 22px;
-      letter-spacing: 10px;
-      font-weight: 200;
-      color: #fff
+    #loading-logo {
+      width: 260px;
+      height: auto;
+      opacity: 0;
+      animation: logoFadeIn .8s ease forwards .1s
     }
 
-    #loading-addr {
-      font-size: 10px;
-      color: rgba(255, 255, 255, .25);
-      letter-spacing: 3px;
-      margin-top: -10px
+    @keyframes logoFadeIn {
+      from { opacity: 0; transform: translateY(6px) }
+      to   { opacity: 1; transform: translateY(0) }
     }
 
     #bar-wrap {
-      width: 260px;
-      height: 2px;
-      background: rgba(255, 255, 255, .1);
+      width: 200px;
+      height: 1px;
+      background: rgba(0, 0, 0, .12);
       border-radius: 2px
     }
 
     #bar {
       height: 100%;
       width: 0;
-      background: #e87430;
+      background: #c08a5a;
       border-radius: 2px;
       transition: width .3s
     }
 
     #loading-txt {
-      font-size: 10px;
-      color: rgba(255, 255, 255, .3);
-      letter-spacing: 3px
+      font-size: 9px;
+      color: rgba(0, 0, 0, .3);
+      letter-spacing: 4px;
+      margin-top: -16px
     }
 
     /* ── Project label ── */
@@ -484,12 +483,11 @@
 
   <!-- Loading -->
   <div id="loading">
-    <div id="loading-title">MOEMA BY YOO</div>
-    <div id="loading-addr">AV. DOS IMARÉS, 182 · SÃO PAULO</div>
+    <img id="loading-logo" src="logo2.png" alt="Vērtice" />
     <div id="bar-wrap">
       <div id="bar"></div>
     </div>
-    <div id="loading-txt">CARREGANDO...</div>
+    <div id="loading-txt">CARREGANDO</div>
   </div>
 
   <!-- Project label -->
