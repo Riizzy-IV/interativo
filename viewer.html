@@ -625,8 +625,8 @@
     bgCv.width = 2; bgCv.height = 256;
     const bgCtx = bgCv.getContext('2d');
     const bgGrad = bgCtx.createLinearGradient(0, 0, 0, 256);
-    bgGrad.addColorStop(0,   '#bcd8e8');
-    bgGrad.addColorStop(1,   '#8aaa96');
+    bgGrad.addColorStop(0,   '#7fb8d4');
+    bgGrad.addColorStop(1,   '#5a8a72');
     bgCtx.fillStyle = bgGrad;
     bgCtx.fillRect(0, 0, 2, 256);
     scene.background = new THREE.CanvasTexture(bgCv);
