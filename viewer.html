@@ -620,28 +620,16 @@
     fill.position.set(-200, 300, -300);
     scene.add(fill);
 
-    // Ground — satellite tile (ArcGIS World Imagery, Av. dos Imarés zoom 17)
-    // Tile coords for lat=-23.5983, lon=-46.6621, zoom=17 → x=24046, y=38972
-    const SAT_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/17/38972/24046';
-    new THREE.TextureLoader().load(SAT_URL, satTex => {
-      satTex.colorSpace = THREE.SRGBColorSpace;
-      const gnd = new THREE.Mesh(
-        new THREE.PlaneGeometry(1200, 1200),
-        new THREE.MeshBasicMaterial({ map: satTex })
-      );
-      gnd.rotation.x = -Math.PI / 2;
-      gnd.position.y = -3;
-      scene.add(gnd);
-    }, undefined, () => {
-      // Fallback: neutral ground
-      const gnd = new THREE.Mesh(
-        new THREE.PlaneGeometry(8000, 8000),
-        new THREE.MeshStandardMaterial({ color: 0x6a7a84, roughness: 1 })
-      );
-      gnd.rotation.x = -Math.PI / 2;
-      gnd.position.y = -3;
-      scene.add(gnd);
-    });
+    // Gradient background (top: light blue → bottom: sage green)
+    const bgCv = document.createElement('canvas');
+    bgCv.width = 2; bgCv.height = 256;
+    const bgCtx = bgCv.getContext('2d');
+    const bgGrad = bgCtx.createLinearGradient(0, 0, 0, 256);
+    bgGrad.addColorStop(0,   '#bcd8e8');
+    bgGrad.addColorStop(1,   '#8aaa96');
+    bgCtx.fillStyle = bgGrad;
+    bgCtx.fillRect(0, 0, 2, 256);
+    scene.background = new THREE.CanvasTexture(bgCv);
 
     // ── Panorama scene ───────────────────────────────────────────────
     const panoScene = new THREE.Scene();
